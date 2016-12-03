@@ -62,8 +62,9 @@
     "webdriverio": "^4.2.16"
   },
   "scripts": {
-    "test": "gulp test",
-    "deploy": "gulp deploy",
+    "test-pr": "gulp test-pr",
+    "test-master": "gulp test-master",
+    "deploy-master": "gulp deploy-master",
     "terraform-install": "gulp terraform-install"
   }
 }
