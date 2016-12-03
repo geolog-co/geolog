@@ -4,19 +4,17 @@ class Api {
   constructor(
     AWS,
     apigClientFactory,
-    region,
-    identityPoolId,
-    uploadBucket
+    config
   ) {
     this.AWS = AWS;
-    this.uploadBucket = uploadBucket;
+    this.uploadBucket = config.uploadBucket;
 
     const creds = new this.AWS.CognitoIdentityCredentials({
-      IdentityPoolId: identityPoolId
+      IdentityPoolId: config.identityPoolId
     });
 
     AWS.config.update({
-      region: region,
+      region: config.region,
       credentials: creds
     });
 
@@ -29,7 +27,7 @@ class Api {
         accessKey: creds.accessKeyId,
         secretKey: creds.secretAccessKey,
         sessionToken: creds.sessionToken,
-        region: region
+        region: config.region
       });    
     });
   }

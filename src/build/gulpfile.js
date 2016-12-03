@@ -29,6 +29,7 @@ const webdriver = require('gulp-webdriver');
 const zip = require('gulp-zip');
 const handlebars = require('handlebars');
 const os = require('os');
+const plato = require('plato');
 const http = require('http');
 const mergeStream = require('merge-stream');
 const net = require('net');
@@ -59,6 +60,7 @@ process.env.AWS_SERVICES ='cognitoidentity,s3'
 
 const RESULTS_DIR = (process.env.CIRCLECI ? process.env.CIRCLE_TEST_REPORTS + '/' : '') + 'results'
 const COVERAGE_DIR = RESULTS_DIR + '/coverage'
+const ANALYSIS_DIR = RESULTS_DIR + '/analysis'
 
 const HOSTED_GRAPHITE_API_KEY = process.env.HOSTED_GRAPHITE_API_KEY;
 
@@ -295,27 +297,23 @@ gulp.task('test-unit-coverage-submit-coveralls', () => {
     .pipe(coveralls());
 });
 
-gulp.task('static-analysis-run', (cb) => {
-  exec('node_modules/.bin/cr --output ' + RESULTS_DIR + '/complexity.json --format json src', (err) => {
-    cb(err);
+gulp.task('static-analysis-run', (done) => {
+  plato.inspect(['src'], ANALYSIS_DIR, {recurse: true}, () => {
+    done()
   });
 });
 
 gulp.task('static-analysis-submit-graphana', () => {
-  return gulp.src([RESULTS_DIR + '/complexity.json'])
+  return gulp.src([ANALYSIS_DIR + '/report.json'])
     .pipe(stream.Transform({
       objectMode: true,
       transform: function(file, enc, callback) {
         const complexity = JSON.parse(file.contents);
         submitMetrics([
-          {name: "analysis.static.firstOrderDensity", value: complexity.firstOrderDensity},
-          {name: "analysis.static.changeCost", value: complexity.changeCost},
-          {name: "analysis.static.coreSize", value: complexity.coreSize},
-          {name: "analysis.static.loc", value: complexity.loc},
-          {name: "analysis.static.cyclomatic", value: complexity.cyclomatic},
-          {name: "analysis.static.effort", value: complexity.effort},
-          {name: "analysis.static.params", value: complexity.params},
-          {name: "analysis.static.maintainability", value: complexity.maintainability}
+          {name: "analysis.static.total.sloc", value: complexity.summary.total.sloc},
+          {name: "analysis.static.total.maintainability", value: complexity.summary.total.maintainability},
+          {name: "analysis.static.average.sloc", value: complexity.summary.average.sloc},
+          {name: "analysis.static.average.maintainability", value: complexity.summary.average.maintainability},
         ], callback);
 
         // complexity.reports.forEach((report) => {
@@ -401,7 +399,8 @@ const assetsBuildDir = (environment) => {
 const frontBuild = (environment) => {
   return getUploadBucket().then((uploadBucket) => {
     const scripts = browserify({
-        entries: 'src/front/assets/app.jsx'
+        entries: 'src/front/assets/app.jsx',
+        extensions: ['.js', '.jsx']
       })
       .transform(transformTools.makeStringTransform("template", {
         includeExtensions: ['config.js']
