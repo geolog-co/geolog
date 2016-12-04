@@ -550,8 +550,13 @@ gulp.task('front-assets-deploy-production', () => {
       'Cache-Control': 'max-age=' + 60 * 60 * 24 * 7 + ', public',
       'Content-Type': 'application/javascript; charset=utf-8'
     }));
+  const css = gulp.src('**/*.css', {cwd: assetsBuildDir('production'), base: assetsBuildDir('production')})
+    .pipe(publish({
+      'Cache-Control': 'max-age=' + 60 * 60 * 24 * 7 + ', public',
+      'Content-Type': 'text/css; charset=utf-8'
+    }));
 
-  return js;
+  return mergeStream(js, css);
 });
 
 gulp.task('front-html-deploy-certification', () => {
