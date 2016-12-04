@@ -93,6 +93,8 @@ const ENVIRONMENTS = {
 
 const IDENTITY_POOL_ID = 'eu-west-1:fdeb8cdc-38e2-4963-9578-5a4f03efdfed';
 const REGION = 'eu-west-1';
+const MAPS_LOADED_CALLBACK = 'onMapsLoaded';
+const MAPS_KEY = 'AIzaSyA0cRx4oUvZkNnVcjr64Q6Xgyu61-ir8qk';
 
 function getTerraformOutput(name) {
   return new Promise((resolve) => {
@@ -409,7 +411,8 @@ const frontBuild = (environment) => {
         const data = {
           identityPoolId: IDENTITY_POOL_ID,
           region: REGION,
-          uploadBucket: uploadBucket
+          uploadBucket: uploadBucket,
+          onMapsLoaded: MAPS_LOADED_CALLBACK
         };
         done(null, template(data));
       }))
@@ -426,6 +429,8 @@ const frontBuild = (environment) => {
     const files = gulp.src(['index.html'], {cwd: 'src/front/site', base: 'src/front/site'})
       .pipe(gulpHandlebars({
         assetsBase: ENVIRONMENTS[environment].assetsBase,
+        onMapsLoaded: MAPS_LOADED_CALLBACK,
+        mapsKey: MAPS_KEY,
       }))
       .pipe(revReplace({manifest: scripts}))
       .pipe(gulp.dest(siteBuildDir(environment)));

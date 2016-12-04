@@ -3,5 +3,6 @@
 module.exports = {
   identityPoolId: '{{ identityPoolId }}',
   region: '{{ region }}',
-  uploadBucket: '{{ uploadBucket }}'
+  uploadBucket: '{{ uploadBucket }}',
+  onMapsLoaded: '{{ onMapsLoaded }}'
 };

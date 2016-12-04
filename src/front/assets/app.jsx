@@ -14,12 +14,18 @@ const api = new Api(
 // For testing
 api.getJob()
 
-const ReactDOM = require('react-dom');
-const GeoLog = require('./ui/geolog');
 document.addEventListener('DOMContentLoaded', () => {
-  ReactDOM.render((
-      <GeoLog api={api} />
-    ),
-    document.getElementById('geolog')
-  );
+  const ReactDOM = require('react-dom');
+  const React = require('react');
+  const GeoLog = require('./ui/geolog');
+
+  const rootDomElement = document.getElementById('app-root');
+  const render = (mapsLoaded) => {
+    ReactDOM.render(<GeoLog api={api} mapsLoaded={mapsLoaded} />, rootDomElement);
+  }
+
+  render(false);
+  window[config.onMapsLoaded] = () => {
+    render(true);
+  };
 });

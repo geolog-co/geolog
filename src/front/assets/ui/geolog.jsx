@@ -1,7 +1,10 @@
+'use strict';
+
 const React = require('react');
 
 const FileButton = require('./file_button');
 const FileList = require('./file_list')
+const Map = require('./map');
 
 class GeoLog extends React.Component {
 
@@ -24,10 +27,13 @@ class GeoLog extends React.Component {
 
   render() {
     return (
-      <div>
-        <h1>GeoLog</h1>
-        <FileButton onFileSelect={this.handleFileSelect} />
-        <FileList files={this.state.files} />
+      <div className="geolog">
+        {this.props.mapsLoaded && <Map mapsLoaded={this.props.mapsLoaded} />}
+        <div className="overlay">
+          <h1>GeoLog</h1>
+          <FileButton onFileSelect={this.handleFileSelect} />
+          <FileList files={this.state.files} />
+        </div>
       </div>
     );
   }
