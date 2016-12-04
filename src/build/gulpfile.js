@@ -608,7 +608,7 @@ gulp.task('test-master', gulp.series(
   'test-submit'
 ));
 
-gulp.task('deploy-master', () => {
+gulp.task('deploy-master', gulp.series(
   // Need IDs of resources to deploy to
   'terraform-install',
   'terraform-init',
@@ -628,6 +628,6 @@ gulp.task('deploy-master', () => {
   ),
   'test-e2e-run-certification',
   'api-deploy-to-production'
-});
+));
 
 gulp.task('default', gulp.series('test-run'));
