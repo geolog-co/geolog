@@ -18,7 +18,8 @@ describe('geolog', () => {
 
   it('has the text geolog', () => {
     browser.url('/');
-    const bodyText = browser.getText('body')
-    bodyText.should.contain('GeoLog');
+    browser.waitUntil(() => {
+      return browser.getText('body').includes('Add track')
+    }, 5000, 'expected text not found');
   });
 });

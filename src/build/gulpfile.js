@@ -8,10 +8,12 @@ const transformTools = require('browserify-transform-tools');
 const browserifyShim = require('browserify-shim');
 const childProcess = require('child_process');
 const concurrent = require('concurrent-transform');
+const cssModulesify = require('css-modulesify')
 const del = require('del');
 const gulp = require('gulp');
 const awspublish = require('gulp-awspublish');
 const streamToBuffer = require('gulp-buffer');
+const concat = require('gulp-concat');
 const connect = require('gulp-connect');
 const coveralls = require('gulp-coveralls');
 const decompress = require('gulp-decompress');
@@ -400,9 +402,26 @@ const assetsBuildDir = (environment) => {
 
 const frontBuild = (environment) => {
   return getUploadBucket().then((uploadBucket) => {
+
+    const appStyles = new stream.PassThrough({
+      objectMode: true
+    });
+
     const scripts = browserify({
         entries: 'src/front/assets/app.jsx',
         extensions: ['.js', '.jsx']
+      })
+      .plugin(cssModulesify, {
+        rootDir: 'src/front/assets/ui'
+      })
+      .on('css stream', (css) => {
+        // Slightly horrible way to extract
+        // out the stream of css to pump through
+        // rev/rev-replace
+        css
+        .pipe(source('ui.css'))
+        .pipe(buffer())
+        .pipe(appStyles);
       })
       .transform(transformTools.makeStringTransform("template", {
         includeExtensions: ['config.js']
@@ -421,7 +440,14 @@ const frontBuild = (environment) => {
       .bundle()
       .pipe(source('app.js'))
       .pipe(buffer())
-      // uglify(),
+
+    // Slightly dodgy way, but it'll do
+    const vendorStyles = gulp.src(['node_modules/purecss/build/pure-min.css'])
+
+    const styles = mergeStream(vendorStyles, appStyles)
+      .pipe(concat('app.css'))
+
+    const assets = mergeStream(scripts, styles)
       .pipe(rev())
       .pipe(gulp.dest(assetsBuildDir(environment)))
       .pipe(rev.manifest());
@@ -432,10 +458,10 @@ const frontBuild = (environment) => {
         onMapsLoaded: MAPS_LOADED_CALLBACK,
         mapsKey: MAPS_KEY,
       }))
-      .pipe(revReplace({manifest: scripts}))
+      .pipe(revReplace({manifest: assets}))
       .pipe(gulp.dest(siteBuildDir(environment)));
 
-    return streamToPromise(mergeStream(scripts, files));
+    return streamToPromise(mergeStream(assets, files));
   });
 }
 

@@ -23,6 +23,7 @@
 - Prefer to explicitly set parameters in all cases rather overriding a default.
 - Prefer to rename variables rather than leaving unclear or inconsistent names live on in the code base.
 - Prefer to pass a few more variables around rather than saving state. E.g. in root for this, could have a `mapsLoaded` variable that is changed when the Google Maps API is loaded. However, no need for this, can just have the 2 callbacks, render(false) and render(true), and re-render the root element as needed.
+- Prefer local to global
 
 ## UI
 

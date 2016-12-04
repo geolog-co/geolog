@@ -1,0 +1,31 @@
+.overlay {
+  background: rgba(0, 0, 0, 0.25);
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.wrapper {
+  width: 100vw;
+  height: 100vh; 
+  padding: 60px 40px;
+}
+
+.modal {
+  width: 100%;
+  height: 100%;
+  background: rgb(255, 255, 255);
+  padding: 5px;
+}
+
+.header {
+  text-align: right;
+  padding: 5px;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.body {
+  padding: 5px;
+}

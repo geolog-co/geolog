@@ -4,6 +4,7 @@
 /build
 /certificates
 /coverage
+/errorShots
 /node_modules
 /npm-debug.log
 /results
