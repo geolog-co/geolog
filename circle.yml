@@ -12,7 +12,6 @@ dependencies:
     - pip install awscli
   override:
     - cd src/back && stack setup
-    - cd src/back && stack init
     - cd src/back && stack build
     - cd src/back && docker build --rm=false -t .
 test:
