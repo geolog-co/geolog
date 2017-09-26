@@ -11,11 +11,10 @@ dependencies:
     - sudo apt-get install -y stack
     - pip install awscli
   override:
-    - cd src/back
-    - stack setup
-    - stack init
-    - stack build
-    - docker build --rm=false -t .
+    - cd src/back && stack setup
+    - cd src/back && stack init
+    - cd src/back && stack build
+    - cd src/back && docker build --rm=false -t .
 test:
   override:
     - echo "No test as yet"
@@ -23,5 +22,4 @@ deployment:
   production:
     branch: master
     commands:
-      - cd src/back
-      - docker build --rm=false .
+      - cd src/back && docker build --rm=false .
