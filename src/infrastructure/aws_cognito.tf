@@ -22,24 +22,6 @@ resource "aws_iam_policy" "geolog_cognito_minimum" {
   policy = "${data.aws_iam_policy_document.geolog_cognito_minimum.json}"
 }
 
-data "aws_iam_policy_document" "geolog_invoke_api_gateway" {
-  statement {
-    sid = ""
-    effect = "Allow"
-    actions = [
-      "execute-api:Invoke"
-    ]
-    resources = [
-      "arn:aws:execute-api:eu-west-1:*:${aws_api_gateway_rest_api.geolog.id}/production/GET/*",
-      "arn:aws:execute-api:eu-west-1:*:${aws_api_gateway_rest_api.geolog.id}/certification/GET/*"
-    ]
-  }
-}
-
-resource "aws_iam_policy" "geolog_invoke_api_gateway" {
-  name = "geolog_invoke_api_gateway"
-  policy = "${data.aws_iam_policy_document.geolog_invoke_api_gateway.json}"
-}
 
 resource "aws_iam_role" "geolog_cognito_unauthenticated" {
     name = "geolog_cognito_unauthenticated"
@@ -93,10 +75,6 @@ resource "aws_iam_role" "geolog_cognito_authenticated" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "geolog_invoke_api_gateway" {
-  role = "${aws_iam_role.geolog_cognito_unauthenticated.name}"
-  policy_arn = "${aws_iam_policy.geolog_invoke_api_gateway.arn}"
-}
 
 resource "aws_iam_role_policy_attachment" "geolog_cognito_minimum" {
   role = "${aws_iam_role.geolog_cognito_unauthenticated.name}"

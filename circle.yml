@@ -1,14 +1,27 @@
 machine:
   node:
     version: 6.9.1
+  services:
+    - docker
 dependencies:
+  pre:
+    - wget -q -O- https://s3.amazonaws.com/download.fpcomplete.com/ubuntu/fpco.key | sudo apt-key add -
+    - echo 'deb http://download.fpcomplete.com/ubuntu/trusty stable main'|sudo tee /etc/apt/sources.list.d/fpco.list
+    - sudo apt-get update
+    - sudo apt-get install -y stack
+    - pip install awscli
   override:
-    - npm install
+    - cd src/back
+    - stack setup
+    - stack build
+    - docker build --rm=false -t .
 test:
   override:
-    - npm run test-$([ ! -z $CI_PULL_REQUEST ] && echo "pr" || echo "master")
+    - echo "No test as yet"
 deployment:
   production:
     branch: master
     commands:
-      - NODE_ENV=production npm run deploy-master
+      - cd src/back
+      - stack --no-terminal install --local-bin-path .
+      - echo "Nothing in deployment yet"

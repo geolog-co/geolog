@@ -57,34 +57,4 @@ data "aws_iam_policy_document" "geolog_ci_master" {
       "arn:aws:s3:::assets.geolog.co/*"
     ]
   }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "apigateway:*"
-    ]
-    resources = [
-      "arn:aws:apigateway:*::/*"
-    ]
-  }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "lambda:*"
-    ]
-    resources = [
-      "${aws_lambda_function.geolog_api.arn}"
-    ]
-  }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "iam:PassRole"
-    ]
-    resources = [
-      "${aws_iam_role.geolog_apigateway.arn}"
-    ]
-  }
 }
