@@ -13,7 +13,6 @@ dependencies:
   override:
     - cd src/back && stack setup
     - cd src/back && stack build
-    - cd src/back && docker build --rm=false -t .
 test:
   override:
     - echo "No test as yet"
