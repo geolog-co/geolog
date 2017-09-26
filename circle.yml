@@ -13,6 +13,7 @@ dependencies:
   override:
     - cd src/back
     - stack setup
+    - stack init
     - stack build
     - docker build --rm=false -t .
 test:
@@ -23,5 +24,4 @@ deployment:
     branch: master
     commands:
       - cd src/back
-      - stack --no-terminal install --local-bin-path .
-      - echo "Nothing in deployment yet"
+      - docker build --rm=false .
