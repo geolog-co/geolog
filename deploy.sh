@@ -27,7 +27,7 @@ echo $DEPLOY_ENV
 aws elasticbeanstalk update-environment --application-name geolog --environment-name $DEPLOY_ENV --version-label $SHA1 --region eu-west-1
 
 # While deploying: should have something better
-sleep 60
+sleep 120
 
 # Swap CNAMES
 aws elasticbeanstalk swap-environment-cnames --region eu-west-1 --source-environment-name geolog-blue --destination-environment-name geolog-green
