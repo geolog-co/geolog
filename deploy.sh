@@ -18,7 +18,7 @@ aws elasticbeanstalk create-application-version --application-name geolog \
     --region eu-west-1
 
 # Get current certification
-DEPLOY_ENV=$(aws elasticbeanstalk describe-environments --region=eu-west-1 --application-name=geolog | jq '.Environments | map(select(.CNAME == "certification-api-geolog.eu-west-1.elasticbeanstalk.com"))[0] | .EnvironmentName')
+DEPLOY_ENV=$(aws elasticbeanstalk describe-environments --region=eu-west-1 --application-name=geolog | jq '.Environments | map(select(.CNAME == "certification-api-geolog.eu-west-1.elasticbeanstalk.com"))[0] | .EnvironmentName' | sed "s/\"//g")
 
 # Update Elastic Beanstalk environment to new version
 aws elasticbeanstalk update-environment --environment-name $DEPLOY_ENV \
