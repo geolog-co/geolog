@@ -24,4 +24,4 @@ DEPLOY_ENV=$(aws elasticbeanstalk describe-environments --region=eu-west-1 --app
 aws elasticbeanstalk update-environment --application-name geolog --environment-name $DEPLOY_ENV --version-label $SHA1 --region eu-west-1
 
 # Swap CNAMES
-aws elasticbeanstalk swap-environment-cnames --region eu-west-1 --application-name geolog --source-environment-name geolog-blue --destination-environment-name geolog-green
+aws elasticbeanstalk swap-environment-cnames --region eu-west-1 --source-environment-name geolog-blue --destination-environment-name geolog-green
