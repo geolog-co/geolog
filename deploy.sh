@@ -21,9 +21,7 @@ aws elasticbeanstalk create-application-version --application-name geolog \
 DEPLOY_ENV=$(aws elasticbeanstalk describe-environments --region=eu-west-1 --application-name=geolog | jq '.Environments | map(select(.CNAME == "certification-api-geolog.eu-west-1.elasticbeanstalk.com"))[0] | .EnvironmentName' | sed "s/\"//g")
 
 # Update Elastic Beanstalk environment to new version
-aws elasticbeanstalk update-environment --environment-name $DEPLOY_ENV \
-    --version-label $SHA1 \
-    --region eu-west-1
+aws elasticbeanstalk update-environment --environment-name $DEPLOY_ENV --version-label $SHA1 --region eu-west-1
 
 # Swap CNAMES
 aws elasticbeanstalk swap-environment-cnames --source-environment-name geolog-blue --destination-environment-name geolog-green
