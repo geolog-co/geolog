@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -e
+
 SHA1=$1
 
 docker build --rm=false -t 772663561820.dkr.ecr.eu-west-1.amazonaws.com/geolog:$SHA1 src/back
@@ -23,6 +25,9 @@ echo $DEPLOY_ENV
 
 # Update Elastic Beanstalk environment to new version
 aws elasticbeanstalk update-environment --application-name geolog --environment-name $DEPLOY_ENV --version-label $SHA1 --region eu-west-1
+
+# While deploying: should have something better
+sleep 60
 
 # Swap CNAMES
 aws elasticbeanstalk swap-environment-cnames --region eu-west-1 --source-environment-name geolog-blue --destination-environment-name geolog-green
