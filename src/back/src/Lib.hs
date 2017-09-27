@@ -37,4 +37,4 @@ getOtherR :: Handler Value
 getOtherR = returnJson $ Person "Matt" 25
 
 runApp :: IO ()
-runApp = warp 3000 App
+runApp = warp 80 App
