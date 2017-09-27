@@ -17,7 +17,13 @@ aws elasticbeanstalk create-application-version --application-name geolog \
     --version-label $SHA1 --source-bundle S3Bucket=$EB_BUCKET,S3Key=$DOCKERRUN_FILE \
     --region eu-west-1
 
+# Get current certification
+DEPLOY_ENV=$(aws elasticbeanstalk describe-environments --region=eu-west-1 --application-name=geolog | jq '.Environments | map(select(.CNAME == "certification-api-geolog.eu-west-1.elasticbeanstalk.com"))[0] | .EnvironmentName')
+
 # Update Elastic Beanstalk environment to new version
-aws elasticbeanstalk update-environment --environment-name geolog-blue \
+aws elasticbeanstalk update-environment --environment-name $DEPLOY_ENV \
     --version-label $SHA1 \
     --region eu-west-1
+
+# Swap CNAMES
+aws elasticbeanstalk swap-environment-cnames --source-environment-name geolog-blue --destination-environment-name geolog-green
