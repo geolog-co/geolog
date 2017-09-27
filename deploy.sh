@@ -5,7 +5,7 @@ SHA1=$1
 docker build --rm=false -t 772663561820.dkr.ecr.eu-west-1.amazonaws.com/geolog:$SHA1 src/back
 
 # Push image to ECR
-$(aws ecr get-login --region <region>)
+$(aws ecr get-login --region eu-west-1)
 docker push 772663561820.dkr.ecr.eu-west-1.amazonaws.com/geolog:$SHA1
 
 # Create new Elastic Beanstalk version
