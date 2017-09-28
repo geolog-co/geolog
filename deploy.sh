@@ -28,8 +28,36 @@ aws elasticbeanstalk create-application-version --application-name geolog \
 echo "Created new EB version"
 
 # Get current certification
-echo "Fetching certification cluster to deploy to..."
-DEPLOY_ENV=$(aws elasticbeanstalk describe-environments --region=eu-west-1 --application-name=geolog | jq '.Environments | map(select(.CNAME == "certification-api-geolog.eu-west-1.elasticbeanstalk.com"))[0] | .EnvironmentName' | sed "s/\"//g")
+echo "Fetching environments..."
+
+LOAD_BALANCER_BLUE=$(aws elasticbeanstalk describe-environment-resources --environment-name geolog-blue --region eu-west-1 | jq '.EnvironmentResources | .LoadBalancers | .[0] | .Name' | sed "s/\"//g")
+LOAD_BALANCER_BLUE_DETAILS=$(aws elb describe-load-balancers --load-balancer-names $LOAD_BALANCER_BLUE --region eu-west-1 | jq '.LoadBalancerDescriptions | .[0]')
+LOAD_BALANCER_BLUE_ZONE_NAME=$(echo $LOAD_BALANCER_BLUE_DETAILS | jq '.CanonicalHostedZoneName' | sed "s/\"//g" | tr '[:upper:]' '[:lower:]').
+LOAD_BALANCER_BLUE_ZONE_ID=$(echo $LOAD_BALANCER_BLUE_DETAILS | jq '.CanonicalHostedZoneNameID' | sed "s/\"//g")
+echo "Found blue"
+
+LOAD_BALANCER_GREEN=$(aws elasticbeanstalk describe-environment-resources --environment-name geolog-green --region eu-west-1 | jq '.EnvironmentResources | .LoadBalancers | .[0] | .Name' | sed "s/\"//g")
+LOAD_BALANCER_GREEN_DETAILS=$(aws elb describe-load-balancers --load-balancer-names $LOAD_BALANCER_GREEN --region eu-west-1 | jq '.LoadBalancerDescriptions | .[0]')
+LOAD_BALANCER_GREEN_ZONE_NAME=$(echo $LOAD_BALANCER_GREEN_DETAILS | jq '.CanonicalHostedZoneName' | sed "s/\"//g" | tr '[:upper:]' '[:lower:]').
+LOAD_BALANCER_GREEN_ZONE_ID=$(echo $LOAD_BALANCER_GREEN_DETAILS | jq '.CanonicalHostedZoneNameID' | sed "s/\"//g")
+echo "Found green"
+
+echo "Finding production environment..."
+ZONE_ID=$(aws route53 list-hosted-zones | jq '.HostedZones | map(select(.Name == "geolog.co.")) | .[0] | .Id' | sed "s/\"//g")
+RECORDS=$(aws route53 list-resource-record-sets --hosted-zone-id $ZONE_ID)
+PRODUCTION_NAME=$(echo $RECORDS | jq '.ResourceRecordSets | .[0] | .AliasTarget | .DNSName' | sed "s/\"//g")
+
+if [ $PRODUCTION_NAME == $LOAD_BALANCER_BLUE_ZONE_NAME ]; then
+  echo "Production: blue"
+  DEPLOY_ENV="geolog-green"
+elif [ $PRODUCTION_NAME == $LOAD_BALANCER_GREEN_ZONE_NAME ]; then
+  echo "Production: green"
+  DEPLOY_ENV="geolog-blue"
+else
+  echo "Unable to find production environment"
+  exit 1
+fi
+
 echo "Certification environment: $DEPLOY_ENV"
 
 # Update Elastic Beanstalk environment to new version
@@ -55,6 +83,7 @@ done
 
 # Swap CNAMES
 echo "Swapping URLs..."
+
 aws elasticbeanstalk swap-environment-cnames --region eu-west-1 --source-environment-name geolog-blue --destination-environment-name geolog-green
 echo "Swapped"
 
