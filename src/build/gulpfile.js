@@ -81,6 +81,8 @@ const BUCKETS = {
   'green': 'green.geolog.co'
 };
 
+const UPLOAD_BUCKET = 'uploads.geolog.co'
+
 const DEVELOPMENT_SITE_PORT = '8080';
 const DEVELOPMENT_ASSETS_PORT = '8081';
 
@@ -108,10 +110,6 @@ function getTerraformOutput(name) {
 
 function getApiGatewayId() {
   return getTerraformOutput('aws_api_gateway_rest_api.geolog.id');
-}
-
-function getUploadBucket() {
-  return getTerraformOutput('aws_s3_bucket.uploads_geolog_co.id');
 }
 
 function updateLambda(zippedCode) {
@@ -401,68 +399,66 @@ const assetsBuildDir = (environment) => {
 }
 
 const frontBuild = (environment) => {
-  return getUploadBucket().then((uploadBucket) => {
 
-    const appStyles = new stream.PassThrough({
-      objectMode: true
-    });
-
-    const scripts = browserify({
-        entries: 'src/front/assets/app.jsx',
-        extensions: ['.js', '.jsx']
-      })
-      .plugin(cssModulesify, {
-        rootDir: 'src/front/assets/ui'
-      })
-      .on('css stream', (css) => {
-        // Slightly horrible way to extract
-        // out the stream of css to pump through
-        // rev/rev-replace
-        css
-        .pipe(source('ui.css'))
-        .pipe(buffer())
-        .pipe(appStyles);
-      })
-      .transform(transformTools.makeStringTransform("template", {
-        includeExtensions: ['config.js']
-      }, (content, transformOptions, done) => {
-        const template = handlebars.compile(content);
-        const data = {
-          identityPoolId: IDENTITY_POOL_ID,
-          region: REGION,
-          uploadBucket: uploadBucket,
-          onMapsLoaded: MAPS_LOADED_CALLBACK
-        };
-        done(null, template(data));
-      }))
-      .transform(babelify, {presets: ["react"]})
-      .transform(browserifyShim)
-      .bundle()
-      .pipe(source('app.js'))
-      .pipe(buffer())
-
-    // Slightly dodgy way, but it'll do
-    const vendorStyles = gulp.src(['node_modules/purecss/build/pure-min.css'])
-
-    const styles = mergeStream(vendorStyles, appStyles)
-      .pipe(concat('app.css'))
-
-    const assets = mergeStream(scripts, styles)
-      .pipe(rev())
-      .pipe(gulp.dest(assetsBuildDir(environment)))
-      .pipe(rev.manifest());
-
-    const files = gulp.src(['index.html'], {cwd: 'src/front/site', base: 'src/front/site'})
-      .pipe(gulpHandlebars({
-        assetsBase: ENVIRONMENTS[environment].assetsBase,
-        onMapsLoaded: MAPS_LOADED_CALLBACK,
-        mapsKey: MAPS_KEY,
-      }))
-      .pipe(revReplace({manifest: assets}))
-      .pipe(gulp.dest(siteBuildDir(environment)));
-
-    return streamToPromise(mergeStream(assets, files));
+  const appStyles = new stream.PassThrough({
+    objectMode: true
   });
+
+  const scripts = browserify({
+      entries: 'src/front/assets/app.jsx',
+      extensions: ['.js', '.jsx']
+    })
+    .plugin(cssModulesify, {
+      rootDir: 'src/front/assets/ui'
+    })
+    .on('css stream', (css) => {
+      // Slightly horrible way to extract
+      // out the stream of css to pump through
+      // rev/rev-replace
+      css
+      .pipe(source('ui.css'))
+      .pipe(buffer())
+      .pipe(appStyles);
+    })
+    .transform(transformTools.makeStringTransform("template", {
+      includeExtensions: ['config.js']
+    }, (content, transformOptions, done) => {
+      const template = handlebars.compile(content);
+      const data = {
+        identityPoolId: IDENTITY_POOL_ID,
+        region: REGION,
+        uploadBucket: UPLOAD_BUCKET,
+        onMapsLoaded: MAPS_LOADED_CALLBACK
+      };
+      done(null, template(data));
+    }))
+    .transform(babelify, {presets: ["react"]})
+    .transform(browserifyShim)
+    .bundle()
+    .pipe(source('app.js'))
+    .pipe(buffer())
+
+  // Slightly dodgy way, but it'll do
+  const vendorStyles = gulp.src(['node_modules/purecss/build/pure-min.css'])
+
+  const styles = mergeStream(vendorStyles, appStyles)
+    .pipe(concat('app.css'))
+
+  const assets = mergeStream(scripts, styles)
+    .pipe(rev())
+    .pipe(gulp.dest(assetsBuildDir(environment)))
+    .pipe(rev.manifest());
+
+  const files = gulp.src(['index.html'], {cwd: 'src/front/site', base: 'src/front/site'})
+    .pipe(gulpHandlebars({
+      assetsBase: ENVIRONMENTS[environment].assetsBase,
+      onMapsLoaded: MAPS_LOADED_CALLBACK,
+      mapsKey: MAPS_KEY,
+    }))
+    .pipe(revReplace({manifest: assets}))
+    .pipe(gulp.dest(siteBuildDir(environment)));
+
+  return streamToPromise(mergeStream(assets, files));
 }
 
 gulp.task('front-build-development', () => {

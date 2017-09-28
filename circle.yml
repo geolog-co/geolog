@@ -8,6 +8,7 @@ dependencies:
     - "~/.cabal"
     - "~/.local"
     - "~/.stack"
+    - "node_modules"
   pre:
     - wget -q -O- https://s3.amazonaws.com/download.fpcomplete.com/ubuntu/fpco.key | sudo apt-key add -
     - echo 'deb http://download.fpcomplete.com/ubuntu/trusty stable main'|sudo tee /etc/apt/sources.list.d/fpco.list
@@ -15,7 +16,10 @@ dependencies:
     - sudo apt-get install -y jq
     - sudo apt-get install -y stack
     - pip install awscli
+    - npm install
   override:
+    # Build index.html, which is compiled into the backend
+    - ./node_modules/.bin/gulp front-build-production
     # Version of https://www.fpcomplete.com/blog/2016/10/static-compilation-with-stack
     # to prevent static compiling issues
     - sudo cp /usr/lib/gcc/x86_64-linux-gnu/4.8/crtbeginT.o /usr/lib/gcc/x86_64-linux-gnu/4.8/crtbeginT.orig
