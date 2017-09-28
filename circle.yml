@@ -18,7 +18,7 @@ dependencies:
     - pip install awscli
   override:
     - cd src/back && stack setup
-    - cd src/back && stack --no-terminal install --local-bin-path .
+    - cd src/back && stack --no-terminal install --ghc-options='-optl-static -optl-pthread' --force-dirty --local-bin-path .
 test:
   override:
     - echo "No test as yet"
