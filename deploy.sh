@@ -3,20 +3,24 @@
 set -e
 
 SHA1=$1
+DATE=$(date +"%Y-%m-%d %H:%M:%S")
+VERSION="$DATE $SHA1"
 
-docker build --rm=false -t 772663561820.dkr.ecr.eu-west-1.amazonaws.com/geolog:$SHA1 src/back
+docker build --rm=false -t 772663561820.dkr.ecr.eu-west-1.amazonaws.com/geolog:$VERSION src/back
 
 # Push image to ECR
 $(aws ecr get-login --region eu-west-1)
-docker push 772663561820.dkr.ecr.eu-west-1.amazonaws.com/geolog:$SHA1
+docker push 772663561820.dkr.ecr.eu-west-1.amazonaws.com/geolog:$VERSION
+
+
 
 # Create new Elastic Beanstalk version
 EB_BUCKET=deploy.geolog.co
-DOCKERRUN_FILE=$SHA1-Dockerrun.aws.json
-sed "s/<TAG>/$SHA1/" < Dockerrun.aws.json.template > $DOCKERRUN_FILE
+DOCKERRUN_FILE=$VERSION-Dockerrun.aws.json
+sed "s/<TAG>/$VERSION/" < Dockerrun.aws.json.template > $DOCKERRUN_FILE
 aws s3 cp $DOCKERRUN_FILE s3://$EB_BUCKET/$DOCKERRUN_FILE --region eu-west-1
 aws elasticbeanstalk create-application-version --application-name geolog \
-    --version-label $SHA1 --source-bundle S3Bucket=$EB_BUCKET,S3Key=$DOCKERRUN_FILE \
+    --version-label $VERSION --source-bundle S3Bucket=$EB_BUCKET,S3Key=$DOCKERRUN_FILE \
     --region eu-west-1
 
 # Get current certification
@@ -24,7 +28,7 @@ DEPLOY_ENV=$(aws elasticbeanstalk describe-environments --region=eu-west-1 --app
 echo $DEPLOY_ENV
 
 # Update Elastic Beanstalk environment to new version
-aws elasticbeanstalk update-environment --application-name geolog --environment-name $DEPLOY_ENV --version-label $SHA1 --region eu-west-1
+aws elasticbeanstalk update-environment --application-name geolog --environment-name $DEPLOY_ENV --version-label $VERSION --region eu-west-1
 
 # Wait until ready and healthy
 READY=false
