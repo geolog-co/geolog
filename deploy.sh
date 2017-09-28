@@ -3,7 +3,7 @@
 set -e
 
 SHA1=$1
-DATE=$(date +"%Y-%m-%d-%H-%M-å%S")
+DATE=$(date +"%Y-%m-%d-%H-%M-%S")
 VERSION="$DATE-$SHA1"
 
 echo "Version: $VERSION"
