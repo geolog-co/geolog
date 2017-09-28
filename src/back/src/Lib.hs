@@ -7,6 +7,8 @@ module Lib
     ( runApp
     ) where
 
+import qualified Data.ByteString
+import           Data.FileEmbed
 import           Data.Text (Text)
 import           Yesod
 
@@ -21,6 +23,10 @@ instance ToJSON Person where
     , "age"  .= age
     ]
 
+-- Repeated ../ a bit horrible. Ideally path passed in at compile time?
+index :: Data.ByteString.ByteString
+index = $(embedFile "../../build/production/site/index.html")
+
 data App = App
 
 mkYesod "App" [parseRoutes|
@@ -31,7 +37,7 @@ mkYesod "App" [parseRoutes|
 instance Yesod App
 
 getHomeR :: Handler Value
-getHomeR = returnJson $ Person "Michal" 34
+getHomeR = sendResponse (typeHtml, toContent index)
 
 getOtherR :: Handler Value
 getOtherR = returnJson $ Person "Matt" 25
