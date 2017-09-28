@@ -16,8 +16,12 @@ dependencies:
     - sudo apt-get install -y stack
     - pip install awscli
   override:
+    # Version of https://www.fpcomplete.com/blog/2016/10/static-compilation-with-stack
+    # to prevent static compiling issues
+    - cp /usr/lib/gcc/x86_64-linux-gnu/4.8/crtbeginT.o /usr/lib/gcc/x86_64-linux-gnu/4.8/crtbeginT.orig
+    - cp /usr/lib/gcc/x86_64-linux-gnu/4.8/crtbeginS.o /usr/lib/gcc/x86_64-linux-gnu/4.8/crtbeginT.o
     - cd src/back && stack setup
-    - cd src/back && stack --no-terminal install --ghc-options='-optl-static -optl-pthread' --force-dirty --local-bin-path .
+    - cd src/back && stack --no-terminal install --ghc-options='-optl-static -optl-pthread -optl-static -fPIC' --force-dirty --local-bin-path .
 test:
   override:
     - echo "No test as yet"
