@@ -26,8 +26,21 @@ echo $DEPLOY_ENV
 # Update Elastic Beanstalk environment to new version
 aws elasticbeanstalk update-environment --application-name geolog --environment-name $DEPLOY_ENV --version-label $SHA1 --region eu-west-1
 
-# While deploying: should have something better
-sleep 120
+# Wait until ready and healthy
+READY=false
+while [ ! $READY = true ]
+do
+  echo "Sleeping..."
+  sleep 10
+  ENVIRONMENT=$(aws elasticbeanstalk describe-environments --region=eu-west-1 --application-name=geolog | jq '.Environments | map(select(.CNAME == "certification-api-geolog.eu-west-1.elasticbeanstalk.com")) | .[0]')
+  STATUS=$(echo $ENVIRONMENT | jq '.Status' | sed "s/\"//g")
+  HEALTH=$(echo $ENVIRONMENT | jq '.Health' | sed "s/\"//g")
+  echo "Status: $STATUS"
+  echo "Health: $HEALTH"
+  if [ "$STATUS" = "Ready" ] && [ "$HEALTH" = "Green" ]; then
+    READY=true
+  fi
+done
 
 # Swap CNAMES
 aws elasticbeanstalk swap-environment-cnames --region eu-west-1 --source-environment-name geolog-blue --destination-environment-name geolog-green
