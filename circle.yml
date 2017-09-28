@@ -19,7 +19,7 @@ dependencies:
     - pip install awscli
   override:
     - cd src/back && stack setup
-    - cd src/back && stack build
+    - cd src/back && stack --no-terminal install --local-bin-path .
 test:
   override:
     - echo "No test as yet"
