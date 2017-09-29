@@ -50,9 +50,17 @@ PRODUCTION_NAME=$(echo $RECORDS | jq '.ResourceRecordSets | .[0] | .AliasTarget 
 if [ $PRODUCTION_NAME == $LOAD_BALANCER_BLUE_ZONE_NAME ]; then
   echo "Production: blue"
   DEPLOY_ENV="geolog-green"
+  DEPLOY_ZONE_ID=$LOAD_BALANCER_GREEN_ZONE_ID
+  DEPLOY_ZONE_NAME=$LOAD_BALANCER_GREEN_ZONE_NAME
+  CERT_ZONE_ID=$LOAD_BALANCER_BLUE_ZONE_ID
+  CERT_ZONE_NAME=$LOAD_BALANCER_BLUE_ZONE_NAME
 elif [ $PRODUCTION_NAME == $LOAD_BALANCER_GREEN_ZONE_NAME ]; then
   echo "Production: green"
   DEPLOY_ENV="geolog-blue"
+  DEPLOY_ZONE_ID=$LOAD_BALANCER_BLUE_ZONE_ID
+  DEPLOY_ZONE_NAME=$LOAD_BALANCER_BLUE_ZONE_NAME
+  CERT_ZONE_ID=$LOAD_BALANCER_GREEN_ZONE_ID
+  CERT_ZONE_NAME=$LOAD_BALANCER_GREEN_ZONE_NAME
 else
   echo "Unable to find production environment"
   exit 1
@@ -81,10 +89,42 @@ do
   fi
 done
 
-# Swap CNAMES
-echo "Swapping URLs..."
 
-aws elasticbeanstalk swap-environment-cnames --region eu-west-1 --source-environment-name geolog-blue --destination-environment-name geolog-green
+echo "Swapping domains..."
+read -r -d '' CHANGES <<EOF
+{
+  "Comment": "Deploy",
+  "Changes": [
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "geolog.co.",
+        "Type": "A",
+        "AliasTarget": {
+          "HostedZoneId": "$DEPLOY_ZONE_ID",
+          "DNSName": "$DEPLOY_ZONE_NAME",
+          "EvaluateTargetHealth": false
+        }
+      }
+    },
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "certification.geolog.co.",
+        "Type": "A",
+        "AliasTarget": {
+          "HostedZoneId": "$CERT_ZONE_ID",
+          "DNSName": "$CERT_ZONE_NAME",
+          "EvaluateTargetHealth": false
+        }
+      }
+    }
+  ]
+}
+EOF
+
+echo $CHANGES
+aws route53 change-resource-record-sets --hosted-zone-id "$ZONE_ID" --change-batch "$CHANGES"
 echo "Swapped"
 
 echo "Deployment done"
