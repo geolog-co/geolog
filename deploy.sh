@@ -91,7 +91,7 @@ done
 
 
 echo "Swapping domains..."
-read -r -d '' CHANGES <<EOF
+CHANGES=$(cat <<EOF
 {
   "Comment": "Deploy",
   "Changes": [
@@ -121,7 +121,7 @@ read -r -d '' CHANGES <<EOF
     }
   ]
 }
-EOF
+EOF)
 
 echo $CHANGES
 aws route53 change-resource-record-sets --hosted-zone-id "$ZONE_ID" --change-batch "$CHANGES"
