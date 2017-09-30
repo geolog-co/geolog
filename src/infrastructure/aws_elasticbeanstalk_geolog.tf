@@ -14,11 +14,7 @@ resource "aws_elastic_beanstalk_environment" "geolog_blue" {
     value     = "${aws_iam_instance_profile.geolog_instance.name}"
   }
 
-  # Swapped by deploy script
-  cname_prefix        = "production-api-geolog"
-  lifecycle {
-    ignore_changes = ["cname_prefix"]
-  }
+  cname_prefix        = "blue-geolog"
 }
 
 resource "aws_elastic_beanstalk_environment" "geolog_green" {
@@ -32,18 +28,14 @@ resource "aws_elastic_beanstalk_environment" "geolog_green" {
     value     = "${aws_iam_instance_profile.geolog_instance.name}"
   }
   
-  # Swapped by deploy script
-  cname_prefix        = "certification-api-geolog"
-  lifecycle {
-    ignore_changes = ["cname_prefix"]
-  }
+  cname_prefix        = "green-geolog"
 }
 
 resource "aws_s3_bucket" "deploy_geolog_co" {
   bucket = "deploy.geolog.co"
 }
 
-resource "aws_route53_record" "api_geolog_co" {
+resource "aws_route53_record" "geolog_co" {
   zone_id = "${aws_route53_zone.geolog-co.zone_id}"
   name = "geolog.co."
   type = "A"
@@ -60,7 +52,7 @@ resource "aws_route53_record" "api_geolog_co" {
   }
 }
 
-resource "aws_route53_record" "api_certification_geolog_co" {
+resource "aws_route53_record" "certification_geolog_co" {
   zone_id = "${aws_route53_zone.geolog-co.zone_id}"
   name = "certification.geolog.co."
   type = "A"

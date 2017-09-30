@@ -10,7 +10,6 @@ const generateProbablyUniqueGuid = () => {
 class Api {
   constructor(
     AWS,
-    apigClientFactory,
     config
   ) {
     this.AWS = AWS;
@@ -27,15 +26,6 @@ class Api {
 
     this.creds = creds.getPromise().then(() => {
       return creds;
-    });
-
-    this.apigClient = this.creds.then(() => {
-      return apigClientFactory.newClient({
-        accessKey: creds.accessKeyId,
-        secretKey: creds.secretAccessKey,
-        sessionToken: creds.sessionToken,
-        region: config.region
-      });    
     });
   }
 

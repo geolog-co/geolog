@@ -2,12 +2,10 @@
 
 const AWS = require('aws-sdk');
 const Api = require('./api/api')
-const apigClientFactory = require('./api/apigClientFactory');
 
 const config = require('./config');
 const api = new Api(
   AWS,
-  apigClientFactory,
   config,
 );
 
