@@ -25,36 +25,41 @@ data "aws_iam_policy_document" "geolog_ci_master" {
   statement {
     effect = "Allow"
     actions = [
-      "s3:ListAllMyBuckets"
+      "ecr:GetAuthorizationToken"
     ]
     resources = [
-      "arn:aws:s3:::*"
+      "*",
     ]
   }
 
   statement {
     effect = "Allow"
     actions = [
-      "s3:Get*",
-      "s3:List*"
+      "ecr:*"
     ]
     resources = [
-      "arn:aws:s3:::geolog-state-production/*"
+      "arn:aws:ecr:eu-west-1:772663561820:repository/geolog",
     ]
   }
 
   statement {
     effect = "Allow"
     actions = [
-      "s3:*"
+        "elasticbeanstalk:*",
+        "ec2:*",
+        "ecs:*",
+        "elasticloadbalancing:*",
+        "autoscaling:*",
+        "cloudwatch:*",
+        "s3:*",
+        "sns:*",
+        "cloudformation:*",
+        "sqs:*",
+        "route53:*"
     ]
     resources = [
-      "arn:aws:s3:::blue.geolog.co",
-      "arn:aws:s3:::blue.geolog.co/*",
-      "arn:aws:s3:::green.geolog.co",
-      "arn:aws:s3:::green.geolog.co/*",
-      "arn:aws:s3:::assets.geolog.co",
-      "arn:aws:s3:::assets.geolog.co/*"
+      # So far couldn't get a more limited
+      "*",
     ]
   }
 }
