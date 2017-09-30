@@ -404,6 +404,10 @@ const frontBuild = (environment) => {
     objectMode: true
   });
 
+  const identity = new stream.PassThrough({
+    objectMode: true
+  });
+
   const scripts = browserify({
       entries: 'src/front/assets/app.jsx',
       extensions: ['.js', '.jsx']
@@ -437,7 +441,7 @@ const frontBuild = (environment) => {
     .bundle()
     .pipe(source('app.js'))
     .pipe(buffer())
-    .pipe(uglify())
+    .pipe(environment == 'production' ? uglify() : identity)
 
   // Slightly dodgy way, but it'll do
   const vendorStyles = gulp.src(['node_modules/purecss/build/pure-min.css'])
