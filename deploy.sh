@@ -89,6 +89,10 @@ do
   fi
 done
 
+echo "Publishing static assets..."
+./node_modules/.bin/gulp front-assets-deploy-production
+echo "Published"
+
 
 echo "Swapping domains..."
 CHANGES=$(cat <<EOF
