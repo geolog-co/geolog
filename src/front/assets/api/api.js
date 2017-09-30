@@ -29,11 +29,11 @@ class Api {
     });
   }
 
-  getJob() {
-    this.apigClient.then((client) => {
-      return client.apiJobsIdGet({id:1});
-    });
-  }
+  // getJob() {
+  //   this.apigClient.then((client) => {
+  //     return client.apiJobsIdGet({id:1});
+  //   });
+  // }
 
   upload(file) {
     this.creds.then((credentials) => {

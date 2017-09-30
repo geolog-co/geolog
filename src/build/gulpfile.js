@@ -25,7 +25,7 @@ const istanbul = require('gulp-istanbul');
 const mocha = require('gulp-mocha');
 const rev = require('gulp-rev');
 const revReplace = require('gulp-rev-replace');
-// const uglify = require('gulp-uglify');
+const uglify = require('gulp-uglify');
 const gutil = require('gulp-util');
 const webdriver = require('gulp-webdriver');
 const zip = require('gulp-zip');
@@ -432,11 +432,12 @@ const frontBuild = (environment) => {
       };
       done(null, template(data));
     }))
-    .transform(babelify, {presets: ["react"]})
+    .transform(babelify, {presets: ["react", "es2015"]})
     .transform(browserifyShim)
     .bundle()
     .pipe(source('app.js'))
     .pipe(buffer())
+    .pipe(uglify())
 
   // Slightly dodgy way, but it'll do
   const vendorStyles = gulp.src(['node_modules/purecss/build/pure-min.css'])

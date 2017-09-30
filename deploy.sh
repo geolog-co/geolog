@@ -79,7 +79,7 @@ while [ ! $READY = true ]
 do
   echo "Sleeping until status and health ok to swap URLs..."
   sleep 10
-  ENVIRONMENT=$(aws elasticbeanstalk describe-environments --region=eu-west-1 --application-name=geolog | jq '.Environments | map(select(.CNAME == "certification-api-geolog.eu-west-1.elasticbeanstalk.com")) | .[0]')
+  ENVIRONMENT=$(aws elasticbeanstalk describe-environments --region=eu-west-1 --application-name=geolog --environment-name $DEPLOY_ENV| jq '.Environments | .[0]')
   STATUS=$(echo $ENVIRONMENT | jq '.Status' | sed "s/\"//g")
   HEALTH=$(echo $ENVIRONMENT | jq '.Health' | sed "s/\"//g")
   echo "Status: $STATUS"

@@ -10,7 +10,7 @@ const api = new Api(
 );
 
 // For testing
-api.getJob()
+// api.getJob()
 
 document.addEventListener('DOMContentLoaded', () => {
   const ReactDOM = require('react-dom');
